@@ -1,9 +1,9 @@
 import React from 'react';
 import {Table, TableBody, TableContainer, TableCell,  TableHead, TableRow} from '@material-ui/core/';
+import {Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle} from '@material-ui/core/';
 import {Paper, Grid, Button } from '@material-ui/core/';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-
 import './ContactList.css';
 
 
@@ -33,23 +33,49 @@ var contacts= [
 class ContactList extends React.Component {
   constructor() {
     super();
+
     this.state = {
-      contacts:contacts,
-      errors: {}
+      contacts:JSON.parse(localStorage.getItem('contacts')) || contacts,
+      deleteID: ""
     };
   }
 
 
+  componentDidUpdate(prevProps) {
+    if(prevProps.updateContact !== this.props.updateContact && this.props.updateContact !== "") {
+      const editedContact = this.props.updateContact
+      var newContacts = this.state.contacts
+
+      if(newContacts.findIndex(x => x.id === editedContact.id) === -1 && this.props.updateContact.name.length > 0) {
+        newContacts.push(editedContact)
+      } else {
+        newContacts[newContacts.findIndex(x => x.id === editedContact.id)] = editedContact
+      }
+      this.setState({contacts: newContacts})
+      localStorage.setItem('contacts', JSON.stringify(newContacts));
+    }
+  }
+
   handleDelete(id) {
-    contacts = contacts.filter(function(item) { return item.id !== id; });
-    this.setState({contacts: contacts})
+    this.setState({deleteID: id})
+  };
+
+  handleDeleteCancel() {
+    this.setState({deleteID: ""})
+  };
+
+  handleDeleteConfirm() {
+    const id = this.state.deleteID
+    var newContacts = this.state.contacts.filter(function(item) { return item.id !== id; });
+    this.setState({contacts: newContacts, deleteID: ""})
+    localStorage.setItem('contacts',  JSON.stringify(newContacts));
+
   };
 
   handleEdit(id) {
-    var contact = contacts.find(x => x.id === id)
+    var contact = this.state.contacts.find(x => x.id === id)
     this.props.handleEdit(contact);
   };
-
 
   actions (id) {
      return (
@@ -72,12 +98,12 @@ class ContactList extends React.Component {
         </Grid>
        </Grid>
      )
-   }
+  }
 
 
 
   render() {
-    const {contacts, errors} = this.state;
+    const {contacts} = this.state;
     return (
       <div className="ContactList">
       <TableContainer className="contactTable" component={Paper}>
@@ -107,9 +133,38 @@ class ContactList extends React.Component {
       </Table>
       </TableContainer>
 
+
+      <Dialog
+        open = {this.state.deleteID !== ""}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        onClose={() => this.handleDeleteCancel()}
+      >
+        <DialogTitle id="alert-dialog-title">{"Delete Contact"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete this contact
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button color="primary" onClick={() => this.handleDeleteCancel()}>
+            No
+          </Button>
+          <Button onClick={() => this.handleDeleteConfirm()} color="primary" autoFocus>
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+
+
+
+
+
       </div>
     )
   }
 }
+
 
 export default ContactList

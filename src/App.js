@@ -9,39 +9,44 @@ class App extends React.Component {
     super();
     this.state = {
       openDialog:false,
-      edit: "new",
-      errors: {}
+      updateContact: "",
     };
   }
 
+
   handleDialog(){
-  	this.setState({openDialog: true});
-
-  }
-
-  handleClose(){
-  	this.setState({openDialog: false, edit: "new"});
-  }
-  handleEdit(contact){
-    console.log(contact);
   	this.setState({
       openDialog: true,
-      edit: contact,
+      updateContact: {
+        id: Math.random(),
+        name: "",
+        surname: "",
+        email: "",
+        phone: "",
+      }
     });
 
   }
 
-contactDialogDisplay(){
-  if (this.state.openDialog){
-    return (
-      <ContactDialog
-        openDialog ={this.state.openDialog}
-        handleClose={() => this.handleClose()}
-        edit={this.state.edit}
-      />
-    );
+  handleClose(){
+    this.setState({
+      openDialog: false,
+    });
   }
-}
+
+  handleSubmit(updatedContact){
+  	this.setState({
+      openDialog: false,
+      updateContact: updatedContact,
+    });
+  }
+
+  handleEdit(contact){
+  	this.setState({
+      openDialog: true,
+      updateContact: contact,
+    });
+  }
 
 
 
@@ -69,16 +74,20 @@ contactDialogDisplay(){
                 Add contact
               </Button>
             </Grid>
-
           </Grid>
         </header>
 
-        <ContactList handleEdit={(contact) => this.handleEdit(contact)}/>
-        {this.contactDialogDisplay()}
-
+        <ContactList handleEdit={(contact) => this.handleEdit(contact)} updateContact={this.state.updateContact}/>
+        <ContactDialog
+          openDialog ={this.state.openDialog}
+          handleClose={() => this.handleClose()}
+          handleSubmit={(updatedContact) => this.handleSubmit(updatedContact)}
+          updateContact={this.state.updateContact}
+        />
     </div>
   )
   }
 }
+
 
 export default App;
