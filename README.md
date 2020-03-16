@@ -1,5 +1,13 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Aruba phone Book
+
+Basic React app for a phone book that allows contacts to be added, deleted and edited.
+contacts store Name, Surname and phone number with an optional email.
+The phone book has a basic search function that searches all fields
+The phone book is stored in local storage to persist on refreshes
+
+
 ## Available Scripts
 
 In the project directory, you can run:

@@ -1,0 +1,10 @@
+.Contact-table{
+  max-width: 90vw;
+  margin-right: 5vw;
+  margin-left: 5vw;
+  max-height: 90vh;
+}
+
+.Contact-table-container{
+  max-height: inherit;
+}

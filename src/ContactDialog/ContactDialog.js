@@ -3,7 +3,7 @@ import {Dialog, DialogActions, DialogContent, DialogTitle} from '@material-ui/co
 import {TextField, Button} from '@material-ui/core';
 import './ContactDialog.css';
 
-
+var emailFormat = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 
 class ContactDialog extends React.Component {
   constructor() {
@@ -21,8 +21,7 @@ class ContactDialog extends React.Component {
     };
   }
 
-
-
+//Takes the cotnact to be added or edited from props to state for editing
 componentDidUpdate() {
   if(this.props.openDialog && !this.state.loaded) {
     this.setState({
@@ -42,7 +41,11 @@ componentDidUpdate() {
         return (
             contact.name.length > 0 &&
             contact.surname.length > 0 &&
-            contact.phone.length > 0
+            contact.phone.length > 2 &&
+            (
+              contact.email === "" ||
+              emailFormat.test((contact.email).toLowerCase())
+            )
         );
     }
 
@@ -62,6 +65,18 @@ componentDidUpdate() {
     });
   }
 
+//allows only numbers and + for phone numbers textfield
+  handleChangeNumber(event){
+    const onlyNums = event.target.value.replace(/^([+\d]{1}?)\d{2, }$/g, '');
+    this.setState({
+      contact: {
+            ...this.state.contact,
+            [event.target.id]: onlyNums
+      }
+    });
+  }
+
+//tests for errors on the textfield
   handleOnBlur(event) {
     if(event.target.value === "") {
       this.setState({
@@ -80,6 +95,48 @@ componentDidUpdate() {
     }
   }
 
+  handleOnBlurPhone(event) {
+    if(event.target.value.length  < 3) {
+      this.setState({
+        error: {
+              ...this.state.error,
+              [event.target.id]: true
+        }
+      });
+    } else if(this.state.error[event.target.id] === true) {
+      this.setState({
+        error: {
+              ...this.state.error,
+              [event.target.id]: false
+        }
+      });
+    }
+  }
+
+  handleOnBlurEmail(event) {
+    if(event.target.value === "") {
+      this.setState({
+        error: {
+              ...this.state.error,
+              [event.target.id]: false
+        }
+      });
+    } else if(emailFormat.test((event.target.value).toLowerCase())) {
+      this.setState({
+        error: {
+              ...this.state.error,
+              [event.target.id]: false
+        }
+      });
+    } else {
+      this.setState({
+        error: {
+              ...this.state.error,
+              [event.target.id]: true
+        }
+      });
+    }
+  }
 
 
   render() {
@@ -88,7 +145,7 @@ componentDidUpdate() {
     return (
       <div className="ContactDialog">
         <Dialog open={openDialog} onClose={() => this.handleClose()} aria-labelledby="form-dialog-title">
-          <DialogTitle id="form-dialog-title">Add Contact</DialogTitle>
+          <DialogTitle id="form-dialog-title">{/*this.props.updateContact.name === "" ? "Add" : "Edit"*/"Add"} Contact</DialogTitle>
           <DialogContent>
 
             <TextField
@@ -122,19 +179,21 @@ componentDidUpdate() {
               label="Email Address"
               type="email"
               fullWidth
+              onBlur={(value) => this.handleOnBlurEmail(value)}
+              error={error.email}
               onChange={(value) => this.handleChange(value)}
               value={contact.email}
             />
             <TextField
-              required
+            required
               margin="dense"
               id="phone"
-              label="phone number"
+              label="phone"
               type="text"
               fullWidth
               onBlur={(value) => this.handleOnBlur(value)}
               error={error.phone}
-              onChange={(value) => this.handleChange(value)}
+              onChange={(value) => this.handleChangeNumber(value)}
               value={contact.phone}
             />
 
